@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Account Details - Next Drive</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0a0e17 0%, #1a2338 100%);
+      color: #e0e7ff;
+      overflow-x: hidden;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Vertical Tabs Sidebar */
+    .sidebar {
+      width: 240px;
+      background: rgba(20, 25, 45, 0.7);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      padding: 80px 20px 40px;
+      position: fixed;
+      height: 100%;
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      margin-bottom: 40px;
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #ffb100, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tab {
+      display: block;
+      padding: 16px 24px;
+      margin: 8px 0;
+      border-radius: 12px;
+      font-weight: 500;
+      color: #a5b4fc;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .tab.active,
+    .tab:hover {
+      background: rgba(230, 57, 57, 0.18);
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(230, 57, 57, 0.15);
+      transform: translateX(6px);
+    }
+
+    .tab.active {
+      border-left: 4px solid #e63939;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      margin-left: 240px;
+      padding: 80px 40px 40px;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 24px;
+      left: 32px;
+      display: flex;
+      align-items: center;
+      color: #a5b4fc;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.3s;
+      z-index: 20;
+    }
+
+    .back-btn:hover {
+      color: #ffb100;
+    }
+
+    .back-btn span {
+      margin-left: 10px;
+    }
+
+    .balance-card {
+      background: rgba(30, 40, 70, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 32px 28px;
+      margin-bottom: 32px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .balance-card h2 {
+      font-size: 38px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #ffb100;
+      letter-spacing: 1px;
+    }
+
+    .balance-card p {
+      font-size: 15px;
+      color: #94a3b8;
+    }
+
+    .transaction-list {
+      background: rgba(30, 40, 70, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.2s;
+    }
+
+    .transaction-item:hover {
+      background: rgba(230,57,57,0.08);
+    }
+
+    .trans-left h4 {
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #e0e7ff;
+    }
+
+    .trans-left p {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .trans-right {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .income { color: #34d399; }
+    .expense { color: #f87171; }
+
+    .loading, .no-data, .error-msg {
+      text-align: center;
+      padding: 80px 20px;
+      color: #94a3b8;
+      font-size: 17px;
+    }
+
+    .error-msg { color: #f87171; }
+
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        padding: 20px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .main {
+        margin-left: 0;
+        padding: 60px 20px 40px;
+      }
+      .sidebar-header { text-align: center; margin-bottom: 20px; }
+      .tab { text-align: center; margin: 6px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="layout">
+
+    <!-- Vertical Tabs Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        
+      </div>
+<br>
+
+      <div class="tab active" data-tab="all">All Transactions</div>
+      <div class="tab" data-tab="revenue">Revenue</div>
+      <div class="tab" data-tab="cashin">Cash In</div>
+      <div class="tab" data-tab="cashout">Cash Out</div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main">
+
+      <a href="home.html" class="back-btn">
+        ← <span>Back to Home</span>
+      </a>
+
+      <!-- All Tab Content (default active) -->
+      <div id="all" class="tab-content active">
+        <div id="all-balance" class="balance-card">
+          <h2>Loading...</h2>
+          <p>Total Balance</p>
+        </div>
+        <div id="all-transactions" class="transaction-list"></div>
+      </div>
+
+      <div id="revenue" class="tab-content">
+        <div id="revenue-balance" class="balance-card">
+          <h2>Loading...</h2>
+          <p>Total Revenue</p>
+        </div>
+        <div id="revenue-transactions" class="transaction-list"></div>
+      </div>
+
+      <div id="cashin" class="tab-content">
+        <div id="cashin-balance" class="balance-card">
+          <h2>Loading...</h2>
+          <p>Total Cash In</p>
+        </div>
+        <div id="cashin-transactions" class="transaction-list"></div>
+      </div>
+
+      <div id="cashout" class="tab-content">
+        <div id="cashout-balance" class="balance-card">
+          <h2>Loading...</h2>
+          <p>Total Cash Out</p>
+        </div>
+        <div id="cashout-transactions" class="transaction-list"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+      authDomain: "bdclash-80f60.firebaseapp.com",
+      projectId: "bdclash-80f60",
+      storageBucket: "bdclash-80f60.firebasestorage.app",
+      messagingSenderId: "842550397820",
+      appId: "1:842550397820:web:285ed51565a4d71d34b2f9",
+      measurementId: "G-DS97G2VVZ4"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      loadUserTransactions(user.uid);
+    });
+
+    function loadUserTransactions(userId) {
+      const ref = db.collection("users").doc(userId).collection("transactions")
+        .orderBy("timestamp", "desc");
+
+      ref.onSnapshot(snap => {
+        const txs = [];
+        let bal = 0, rev = 0, cin = 0, cout = 0;
+
+        snap.forEach(doc => {
+          const d = doc.data();
+          const amt = Number(d.amount) || 0;
+          txs.push({id: doc.id, ...d});
+
+          if (d.type === "revenue" || d.type === "cashin") {
+            bal += amt;
+            if (d.type === "revenue") rev += amt;
+            if (d.type === "cashin") cin += amt;
+          } else if (d.type === "cashout") {
+            bal -= amt;
+            cout += amt;
+          }
+        });
+
+        render("all", txs, bal);
+        render("revenue", txs.filter(t => t.type === "revenue"), rev);
+        render("cashin", txs.filter(t => t.type === "cashin"), cin);
+        render("cashout", txs.filter(t => t.type === "cashout"), cout);
+      }, err => {
+        document.querySelectorAll('.transaction-list').forEach(el => {
+          el.innerHTML = `<p class="error-msg">Error: ${err.message}</p>`;
+        });
+      });
+    }
+
+    function render(tabId, transactions, balance) {
+      const balEl = document.getElementById(`${tabId}-balance`);
+      const listEl = document.getElementById(`${tabId}-transactions`);
+
+      balEl.innerHTML = `
+        <h2>৳ ${balance.toLocaleString('bn-BD')}</h2>
+        <p>${tabId.charAt(0).toUpperCase() + tabId.slice(1).replace(/([A-Z])/g, ' $1')}</p>
+      `;
+
+      if (transactions.length === 0) {
+        listEl.innerHTML = `<p class="no-data">No transactions yet in this category.</p>`;
+        return;
+      }
+
+      let html = '';
+      transactions.forEach(t => {
+        const positive = (t.type === "revenue" || t.type === "cashin");
+        html += `
+          <div class="transaction-item">
+            <div class="trans-left">
+              <h4>${t.description || 'Transaction'}</h4>
+              <p>${t.timestamp ? new Date(t.timestamp.toDate()).toLocaleString('bn-BD', {dateStyle:'medium', timeStyle:'short'}) : '—'}</p>
+            </div>
+            <div class="trans-right ${positive ? 'income' : 'expense'}">
+              ${positive ? '+' : '-'}৳ ${Math.abs(t.amount).toLocaleString('bn-BD')}
+            </div>
+          </div>
+        `;
+      });
+      listEl.innerHTML = html;
+    }
+
+    // Vertical tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        tab.classList.add('active');
+        const id = tab.getAttribute('data-tab');
+        document.getElementById(id).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

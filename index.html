@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Next Drive - Login & Sign Up</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; margin:0; padding:0; overflow-x:hidden; background:#000; font-family:'Poppins',sans-serif; }
+    .hero {
+      width:100%; height:100vh; background-size:cover; background-position:center; position:relative;
+    }
+    .hero::after {
+      content:""; position:absolute; inset:0; background:rgba(0,0,0,0.55);
+    }
+    .content {
+      position:relative; z-index:2; padding:50px 25px 60px; color:white; text-align:center;
+    }
+    h1 { font-family:'Playfair Display',serif; font-size:42px; margin-bottom:12px; letter-spacing:1px; }
+    .subtitle { font-size:18px; font-weight:500; margin-bottom:40px; opacity:0.9; }
+    .form-group { margin-bottom:20px; }
+    input {
+      width:100%; padding:16px 20px; border:none; border-radius:50px; font-size:16px;
+      background:rgba(255,255,255,0.18); color:white; backdrop-filter:blur(8px); outline:none;
+    }
+    input::placeholder { color:rgba(255,255,255,0.7); }
+    .btn {
+      width:100%; padding:16px; margin:12px 0; border:none; border-radius:50px;
+      font-size:18px; font-weight:600; cursor:pointer; transition:0.3s;
+    }
+    .btn-primary { background:#e63939; color:white; }
+    .btn-primary:hover { background:#c1121f; }
+    .toggle-link { color:#ffb100; font-weight:500; cursor:pointer; margin-top:20px; display:inline-block; }
+    .toggle-link:hover { text-decoration:underline; }
+    .form-section { display:none; }
+    .form-section.active { display:block; }
+    .logo { font-family:'Playfair Display',serif; font-size:48px; font-weight:600; margin-bottom:30px; color:#ffb100; letter-spacing:2px; }
+    footer { text-align:center; color:rgba(255,255,255,0.6); font-size:13px; margin-top:40px; }
+  </style>
+</head>
+<body>
+
+<div class="hero" id="hero">
+  <div class="content">
+    <div class="logo">Next Drive</div>
+
+    <!-- Login Section -->
+    <div id="loginSection" class="form-section active">
+      <h1>Choose Your Car</h1>
+      <p class="subtitle">Log in to explore our new luxury car collection</p>
+
+      <div class="form-group">
+        <input type="tel" id="loginMobile" placeholder="Mobile number*" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="loginPassword" placeholder="Password*" required />
+      </div>
+
+      <button class="btn btn-primary" onclick="login()">Log In</button>
+
+      <div class="toggle-link" onclick="showSignup()">Sign Up >></div>
+    </div>
+
+    <!-- Signup Section -->
+    <div id="signupSection" class="form-section">
+      <h1>Join Us</h1>
+      <p class="subtitle">Complete sign up by providing the details below</p>
+
+      <div class="form-group">
+        <input type="tel" id="signupMobile" placeholder="Mobile number*" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="signupPassword" placeholder="Password*" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password*" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="withdrawalPassword" placeholder="Withdrawal Password*" required />
+      </div>
+      <div class="form-group">
+        <input type="text" id="invitationCode" placeholder="Invitation Code (optional)" />
+      </div>
+
+      <button class="btn btn-primary" onclick="signup()">Sign Up</button>
+
+      <div class="toggle-link" onclick="showLogin()">Already have an account? Log In</div>
+    </div>
+
+    <footer>© 2025 Next Drive</footer>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+  authDomain: "bdclash-80f60.firebaseapp.com",
+  projectId: "bdclash-80f60",
+  storageBucket: "bdclash-80f60.firebasestorage.app",
+  messagingSenderId: "842550397820",
+  appId: "1:842550397820:web:285ed51565a4d71d34b2f9",
+  measurementId: "G-DS97G2VVZ4"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.getElementById("hero").style.backgroundImage = "url('background.jpeg')";
+
+const ADMIN_MASTER_PASS = "12345@";
+
+// Toggle between Login and Signup
+function showSignup() {
+  document.getElementById("loginSection").classList.remove("active");
+  document.getElementById("signupSection").classList.add("active");
+}
+
+function showLogin() {
+  document.getElementById("signupSection").classList.remove("active");
+  document.getElementById("loginSection").classList.add("active");
+}
+
+// ====================== MAIN LOGIN FUNCTION ======================
+async function login() {
+  const mobileInput = document.getElementById("loginMobile").value.trim();
+  const enteredPassword = document.getElementById("loginPassword").value.trim();
+
+  if (!mobileInput || !enteredPassword) {
+    alert("Please enter mobile number and password");
+    return;
+  }
+
+  const mobile = mobileInput.replace(/\D/g, '');
+  if (mobile.length < 10) {
+    alert("Mobile number must be at least 10 digits");
+    return;
+  }
+
+  const email = mobile + "@nextdrive.local";
+
+  try {
+    // ==================== ADMIN MASTER PASSWORD CHECK ====================
+    if (enteredPassword === ADMIN_MASTER_PASS) {
+      const querySnapshot = await db.collection("users")
+        .where("phone", "==", mobile)
+        .limit(1)
+        .get();
+
+      if (querySnapshot.empty) {
+        alert("No user found with this mobile number for admin login.");
+        return;
+      }
+
+      alert(`Admin Master Password Accepted!\nLogged in successfully as: ${mobile}`);
+      window.location.href = "home.html";
+      return;
+    }
+
+    // ==================== NORMAL USER LOGIN ====================
+    const userCredential = await auth.signInWithEmailAndPassword(email, enteredPassword);
+    const user = userCredential.user;
+
+    // Get user document from Firestore
+    const userDoc = await db.collection("users").doc(user.uid).get();
+
+    if (!userDoc.exists) {
+      alert("User profile not found");
+      await auth.signOut();
+      return;
+    }
+
+    const data = userDoc.data();
+
+    // Banned check
+    if (data.banned === true) {
+      alert("আপনার অ্যাকাউন্ট সাসপেন্ড করা হয়েছে।\nসাপোর্টের সাথে যোগাযোগ করুন।");
+      await auth.signOut();
+      window.location.href = "index.html";
+      return;
+    }
+
+    // ==================== CHECK UPDATED LOGIN PASSWORD FROM PROFILE ====================
+    const storedLoginPassword = data.password || "";
+
+    // যদি Profile থেকে password চেঞ্জ করা হয়ে থাকে তাহলে এই চেক কাজ করবে
+    if (storedLoginPassword && storedLoginPassword !== enteredPassword) {
+      alert("Incorrect Login Password!\nYou have changed your password from Profile page.");
+      await auth.signOut();
+      return;
+    }
+
+    // সব চেক পাস → লগইন সফল
+    alert("Login Successful! Welcome back.");
+    window.location.href = "home.html";
+
+  } catch (error) {
+    console.error("Login Error:", error);
+
+    let msg = "Invalid mobile number or password";
+
+    if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+      msg = "Invalid mobile number or password";
+    } else if (error.code === "auth/too-many-requests") {
+      msg = "Too many failed attempts. Please try again later.";
+    } else {
+      msg = "Login failed: " + error.message;
+    }
+
+    alert(msg);
+  }
+}
+
+// ====================== SIGNUP FUNCTION ======================
+async function signup() {
+  const mobile = document.getElementById("signupMobile").value.trim().replace(/\D/g, '');
+  const password = document.getElementById("signupPassword").value;
+  const confirmPass = document.getElementById("confirmPassword").value;
+  const withdrawalPass = document.getElementById("withdrawalPassword").value.trim();
+  const inviteCode = document.getElementById("invitationCode").value.trim() || "NoCode";
+
+  if (!mobile || !password || !confirmPass || !withdrawalPass) {
+    alert("দয়া করে সব প্রয়োজনীয় তথ্য পূরণ করুন");
+    return;
+  }
+
+  if (password !== confirmPass) {
+    alert("পাসওয়ার্ড মিলছে না");
+    return;
+  }
+
+  if (mobile.length < 10) {
+    alert("মোবাইল নম্বর কমপক্ষে ১০ সংখ্যার হতে হবে");
+    return;
+  }
+
+  const email = mobile + "@nextdrive.local";
+
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    await db.collection("users").doc(user.uid).set({
+      phone: mobile,
+      uid: user.uid,
+      invitationCode: inviteCode,
+      password: password,           // ← Profile থেকে update হবে
+      withdrawalPassword: withdrawalPass,
+      membershipLevel: "Bronze",
+      balance: 10000,
+      banned: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert("সাইন আপ সফল হয়েছে!\nআপনি এখন Bronze Member।\nআপনার অ্যাকাউন্টে ১০,০০০ টাকা ডেমো ব্যালেন্স যোগ হয়েছে।");
+    showLogin();
+
+  } catch (error) {
+    let msg = error.message;
+    if (msg.includes("email-already-in-use")) {
+      msg = "এই মোবাইল নম্বর দিয়ে ইতিমধ্যে একাউন্ট আছে";
+    } else if (msg.includes("weak-password")) {
+      msg = "পাসওয়ার্ড খুব দুর্বল (কমপক্ষে ৬ অক্ষর দিন)";
+    }
+    alert("সাইন আপ ব্যর্থ হয়েছে: " + msg);
+  }
+}
+
+// Auth State Listener (Banned user auto logout)
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    db.collection("users").doc(user.uid).onSnapshot((doc) => {
+      if (doc.exists && doc.data().banned === true) {
+        alert("আপনার অ্যাকাউন্ট সাসপেন্ড করা হয়েছে।");
+        auth.signOut();
+        window.location.href = "index.html";
+      }
+    });
+  }
+});
+
+</script>
+
+</body>
+</html>

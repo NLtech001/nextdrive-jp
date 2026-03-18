@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Profile - PS Group</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fa; color: #111; min-height: 100vh; padding-bottom: 90px; }
+
+    header {
+      position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+      background: #ffffff; box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; z-index: 1000;
+    }
+
+    .hamburger { font-size: 28px; cursor: pointer; color: #333; }
+    .logo { max-height: 48px; width: auto; }
+    .header-right { font-size: 24px; color: #333; }
+
+    .hero-bg {
+      position: fixed; top: 70px; left: 0; width: 100%;
+      height: calc(100vh - 70px);
+      background: url('background.jpg') center/cover no-repeat;
+      z-index: -1; filter: brightness(0.85);
+    }
+
+    .content {
+      position: relative; padding-top: 90px; padding-bottom: 100px;
+      max-width: 480px; margin: 0 auto; text-align: center;
+    }
+
+    .profile-section { display: flex; align-items: center; gap: 16px; padding: 0 20px; margin-bottom: 24px; }
+
+    .profile-icon {
+      width: 70px; height: 70px; background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15); font-size: 38px; color: #666; flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; text-align: left; }
+    .user-info h3 { font-size: 1.35rem; font-weight: 600; color: #111; margin: 0 0 4px 0; }
+    .user-info p { font-size: 1.05rem; color: #555; margin: 2px 0; }
+
+    .membership-badge {
+      display: inline-block; margin-top: 8px; padding: 6px 14px;
+      color: white; border-radius: 20px; font-size: 0.95rem; font-weight: 600;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; margin: 0 20px 24px; padding: 18px 20px; border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(102,126,234,0.3); display: flex; align-items: center; gap: 16px;
+    }
+
+    .balance-icon {
+      width: 52px; height: 52px; background: rgba(255,255,255,0.25); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; flex-shrink: 0;
+    }
+
+    .balance-info { flex: 1; text-align: left; }
+    .balance-label { font-size: 0.95rem; opacity: 0.95; margin-bottom: 2px; }
+    #userBalance { font-size: 1.8rem; font-weight: 700; margin: 0; }
+
+    .refresh-balance {
+      margin-top: 8px; padding: 6px 14px; background: rgba(255,255,255,0.35);
+      border: none; border-radius: 20px; color: white; font-size: 0.85rem; cursor: pointer;
+    }
+
+    .refresh-balance:hover { background: rgba(255,255,255,0.55); }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin: 40px 20px;
+    }
+
+    .diamond-btn {
+      width: 110px;
+      height: 110px;
+      background: white;
+      border-radius: 26px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.14);
+      transition: all 0.35s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .diamond-btn:hover {
+      transform: translateY(-12px) scale(1.05);
+      box-shadow: 0 22px 50px rgba(0,0,0,0.24);
+    }
+
+    .diamond-btn .icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: white;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .cash-in .icon { background: #e63939; }
+    .cash-out .icon { background: #1e3a8a; }
+
+    .diamond-btn span {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #333;
+      text-align: center;
+    }
+
+    .option {
+      background: white; margin: 12px 20px; padding: 18px 22px; border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06); display: flex; justify-content: space-between;
+      align-items: center; font-size: 1.05rem; font-weight: 500; cursor: pointer;
+    }
+
+    .option span:last-child { color: #e63939; font-size: 1.4rem; }
+
+    .sidebar { position: fixed; left: -260px; top: 0; width: 260px; height: 100%; background: white; box-shadow: 3px 0 15px rgba(0,0,0,0.2); padding: 25px 0; transition: left 0.4s ease; z-index: 999; overflow-y: auto; }
+    .sidebar.active { left: 0; }
+    .sidebar-header { padding: 15px 20px; font-size: 28px; text-align: right; border-bottom: 1px solid #eee; }
+    .sidebar-header span { cursor: pointer; color: #333; }
+    .sidebar a.menu-item { display: block; padding: 16px 25px; text-decoration: none; color: #333; font-weight: 500; font-size: 17px; border-bottom: 1px solid #f0f0f0; }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: 78px;
+      background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.12);
+      display: flex; justify-content: space-around; align-items: center; z-index: 999;
+    }
+
+    .nav-btn { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+    .nav-btn img { width: 50px; height: 50px; object-fit: contain; }
+
+    .popup { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 3000; }
+    .popup-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .popup h3 { margin-bottom: 20px; text-align: center; }
+    .popup input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+    .popup button { width: 48%; padding: 12px; margin: 10px 1%; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    .popup .confirm { background: #4caf50; color: white; }
+    .popup .cancel { background: #f44336; color: white; }
+    .error-msg { color: #e63939; font-size: 0.9rem; margin-top: 4px; display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hamburger" onclick="toggleSidebar()">☰</div>
+  <img src="logo.png" alt="PS Group Logo" class="logo">
+  <div class="header-right">🎧</div>
+</header>
+
+<div class="hero-bg"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header"><span onclick="toggleSidebar()">×</span></div>
+  <a href="details.html" class="menu-item">Details</a>
+  <a href="credit.html" class="menu-item">Credit Score</a>
+  <a href="help.html" class="menu-item">Help Center</a>
+  <a href="aboutus.html" class="menu-item">About Us</a>
+  <a href="#" class="menu-item" onclick="logout()">Logout</a>
+</div>
+
+<div class="content">
+
+  <div class="profile-section">
+    <div class="profile-icon">👤</div>
+    <div class="user-info">
+      <h3 id="userPhone">Loading...</h3>
+      <p id="userUID">UID: Loading...</p>
+      <div id="membershipBadge" class="membership-badge">Loading...</div>
+    </div>
+  </div>
+
+  <div class="balance-card">
+    <div class="balance-icon">৳</div>
+    <div class="balance-info">
+      <p class="balance-label">Available Balance</p>
+      <h2 id="userBalance">Loading...</h2>
+      <button class="refresh-balance" onclick="refreshBalance()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <div class="diamond-btn cash-in" onclick="window.location.href='cashin.html'">
+      <div class="icon">+</div>
+      <span>Cash In</span>
+    </div>
+
+    <div class="diamond-btn cash-out" onclick="showWithdrawVerifyPopup()">
+      <div class="icon">💰</div>
+      <span>Cash Out</span>
+    </div>
+  </div>
+
+  <div class="option" onclick="showChangePasswordPopup('login')">
+    Change login password <span>››</span>
+  </div>
+  <div class="option" onclick="showChangePasswordPopup('withdraw')">
+    Change withdraw password <span>››</span>
+  </div>
+
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html" class="nav-btn"><img src="1st.jpg" alt="Home"></a>
+  <a href="bonus.html" class="nav-btn"><img src="2nd.jpg" alt="Bonus"></a>
+  <a href="collection.html" class="nav-btn"><img src="3rd.jpg" alt="Credit"></a>
+  <a href="level.html" class="nav-btn"><img src="4th.jpg" alt="Help"></a>
+  <a href="profile.html" class="nav-btn"><img src="5th.jpg" alt="Profile"></a>
+</div>
+
+<!-- Password Change Popup -->
+<div id="passwordPopup" class="popup">
+  <div class="popup-content">
+    <h3 id="popupTitle">Change Password</h3>
+
+    <div id="oldPasswordGroup">
+      <input type="password" id="oldPassword" placeholder="Current Password" />
+      <div id="oldPassError" class="error-msg">Incorrect current password</div>
+    </div>
+
+    <input type="password" id="newPassword" placeholder="New Password" />
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" />
+
+    <div id="passError" class="error-msg"></div>
+
+    <div style="margin-top: 20px;">
+      <button class="confirm" onclick="handlePasswordUpdate()">Confirm</button>
+      <button class="cancel" onclick="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Password Verification Popup -->
+<div id="withdrawVerifyPopup" class="popup">
+  <div class="popup-content">
+    <h3>Enter Withdraw Password</h3>
+
+    <input type="password" id="verifyWithdrawPass" placeholder="Withdraw Password" />
+    <div id="verifyError" class="error-msg"></div>
+
+    <div style="margin-top: 20px;">
+      <button class="confirm" onclick="verifyWithdrawPassword()">Confirm</button>
+      <button class="cancel" onclick="closeVerifyPopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+  authDomain: "bdclash-80f60.firebaseapp.com",
+  projectId: "bdclash-80f60",
+  storageBucket: "bdclash-80f60.firebasestorage.app",
+  messagingSenderId: "842550397820",
+  appId: "1:842550397820:web:285ed51565a4d71d34b2f9",
+  measurementId: "G-DS97G2VVZ4"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentChangeType = 'login';
+let pendingCashout = false;
+
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("active");
+}
+
+function showChangePasswordPopup(type) {
+  currentChangeType = type;
+  pendingCashout = false;
+
+  document.getElementById("popupTitle").textContent = 
+    type === 'login' ? "Change Login Password" : "Change Withdraw Password";
+
+  document.getElementById("oldPasswordGroup").style.display = 'block';
+
+  document.getElementById("oldPassword").value = "";
+  document.getElementById("newPassword").value = "";
+  document.getElementById("confirmPassword").value = "";
+
+  document.getElementById("oldPassError").style.display = "none";
+  document.getElementById("passError").style.display = "none";
+  document.getElementById("passError").textContent = "";
+
+  document.getElementById("passwordPopup").style.display = "flex";
+}
+
+function showWithdrawVerifyPopup() {
+  pendingCashout = true;
+  document.getElementById("verifyWithdrawPass").value = "";
+  document.getElementById("verifyError").style.display = "none";
+  document.getElementById("verifyError").textContent = "";
+  document.getElementById("withdrawVerifyPopup").style.display = "flex";
+}
+
+function closePopup() {
+  document.getElementById("passwordPopup").style.display = "none";
+}
+
+function closeVerifyPopup() {
+  document.getElementById("withdrawVerifyPopup").style.display = "none";
+}
+
+async function verifyWithdrawPassword() {
+  const pass = document.getElementById("verifyWithdrawPass").value.trim();
+  if (!pass) {
+    document.getElementById("verifyError").textContent = "Please enter password";
+    document.getElementById("verifyError").style.display = "block";
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Not logged in");
+    return;
+  }
+
+  try {
+    const doc = await db.collection("users").doc(user.uid).get();
+    if (!doc.exists) {
+      alert("User profile not found");
+      return;
+    }
+
+    const storedPass = doc.data().withdrawalPassword || "";
+
+    if (storedPass === pass) {
+      closeVerifyPopup();
+      if (pendingCashout) {
+        window.location.href = "cashout.html";
+        pendingCashout = false;
+      }
+    } else {
+      document.getElementById("verifyError").textContent = "Incorrect withdraw password";
+      document.getElementById("verifyError").style.display = "block";
+    }
+  } catch (err) {
+    console.error("Verify error:", err);
+    alert("Error: " + err.message);
+  }
+}
+
+// ====================== FIXED PASSWORD UPDATE FUNCTION ======================
+async function handlePasswordUpdate() {
+  const oldPass     = document.getElementById("oldPassword").value.trim();
+  const newPass     = document.getElementById("newPassword").value.trim();
+  const confirmPass = document.getElementById("confirmPassword").value.trim();
+
+  const errorEl = document.getElementById("passError");
+
+  if (!oldPass || !newPass || !confirmPass) {
+    errorEl.textContent = "Please fill all fields";
+    errorEl.style.display = "block";
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    errorEl.textContent = "New passwords do not match";
+    errorEl.style.display = "block";
+    return;
+  }
+
+  if (newPass.length < 6) {
+    errorEl.textContent = "Password must be at least 6 characters";
+    errorEl.style.display = "block";
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) return alert("Not logged in");
+
+  try {
+    const userRef = db.collection("users").doc(user.uid);
+    const doc = await userRef.get();
+    if (!doc.exists) return alert("User not found");
+
+    const data = doc.data();
+    const field = currentChangeType === 'login' ? 'password' : 'withdrawalPassword';
+    const storedOld = data[field] || "";
+
+    // Old password check
+    if (storedOld !== oldPass) {
+      document.getElementById("oldPassError").style.display = "block";
+      return;
+    }
+
+    // 🔥 Login Password হলে Firebase Auth-এও আপডেট করো
+    if (currentChangeType === 'login') {
+      await user.updatePassword(newPass);
+      console.log("Firebase Auth password updated");
+    }
+
+    // Firestore-এও আপডেট
+    await userRef.update({ [field]: newPass });
+
+    alert(currentChangeType === 'login' 
+      ? "Login password changed successfully!" 
+      : "Withdraw password changed successfully!");
+
+    closePopup();
+
+  } catch (err) {
+    console.error("Update error:", err);
+
+    if (err.code === "auth/requires-recent-login") {
+      alert("Please logout and login again first, then try changing the password.");
+    } else if (err.code === "auth/weak-password") {
+      alert("New password is too weak. Use at least 6 characters.");
+    } else {
+      alert("Error: " + err.message);
+    }
+  }
+}
+
+function refreshBalance() {
+  loadUserData();
+}
+
+function loadUserData() {
+  const phoneEl   = document.getElementById("userPhone");
+  const uidEl     = document.getElementById("userUID");
+  const balEl     = document.getElementById("userBalance");
+  const badgeEl   = document.getElementById("membershipBadge");
+
+  phoneEl.textContent   = "Loading...";
+  uidEl.textContent     = "UID: Loading...";
+  balEl.textContent     = "Loading...";
+  badgeEl.innerHTML     = "Loading...";
+  badgeEl.style.background = "#777";
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      phoneEl.textContent   = "Please login";
+      uidEl.textContent     = "UID: -";
+      balEl.textContent     = "৳ 0.00";
+      badgeEl.innerHTML     = "Not logged in";
+      badgeEl.style.background = "#777";
+      return;
+    }
+
+    db.collection("users").doc(user.uid).onSnapshot(doc => {
+      if (!doc.exists) {
+        phoneEl.textContent   = "Account not found";
+        uidEl.textContent     = "UID: Unknown";
+        balEl.textContent     = "৳ 0.00";
+        badgeEl.innerHTML     = "No Account";
+        badgeEl.style.background = "#e63939";
+        return;
+      }
+
+      const data = doc.data();
+
+      phoneEl.textContent = data.phone || "Not set";
+      uidEl.textContent   = "UID: ..." + user.uid.slice(-8);
+
+      const balance = Number(data.balance) || 0;
+      balEl.textContent = "৳ " + balance.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      let packageName = "Bronze";
+      let badgeColor  = "#CD7F32";
+
+      if (data.membership && data.membership.packageName) {
+        packageName = data.membership.packageName;
+
+        if (data.membership.expiresAt) {
+          const expiryDate = new Date(data.membership.expiresAt);
+          if (expiryDate < new Date()) {
+            packageName += " (Expired)";
+            badgeColor = "#e63939";
+          } else {
+            badgeColor = "#4caf50";
+          }
+        }
+
+        const lowerName = packageName.toLowerCase();
+        if (lowerName.includes("gold") || lowerName.includes("premium")) {
+          badgeColor = "#FFD700";
+        } else if (lowerName.includes("silver")) {
+          badgeColor = "#C0C0C0";
+        } else if (lowerName.includes("platinum")) {
+          badgeColor = "#E5E4E2";
+        }
+      }
+
+      badgeEl.innerHTML = packageName + " 🏅";
+      badgeEl.style.background = badgeColor;
+
+    }, err => {
+      console.error("Firestore error:", err);
+      phoneEl.textContent   = "Error loading data";
+      balEl.textContent     = "Error";
+      badgeEl.innerHTML     = "Load Error";
+      badgeEl.style.background = "#e63939";
+    });
+  });
+}
+
+function logout() {
+  auth.signOut()
+    .then(() => window.location.href = "index.html")
+    .catch(err => alert("Logout failed: " + err.message));
+}
+
+window.onload = loadUserData;
+
+document.addEventListener("DOMContentLoaded", () => {
+  const current = window.location.pathname.split("/").pop() || "profile.html";
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    if (btn.href.endsWith(current)) btn.classList.add("active");
+  });
+});
+</script>
+
+</body>
+</html>

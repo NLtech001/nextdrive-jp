@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Collection - PS Group</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      font-family: 'Poppins', sans-serif;
+      background: #ffffff;
+      color: #111;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+      z-index: 1000;
+    }
+
+    .logo-img { max-height: 50px; width: auto; }
+
+    .main {
+      padding-top: 90px;
+      padding-bottom: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 2.6rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #111;
+    }
+
+    .slider-container {
+      position: relative;
+      width: 92%;
+      max-width: 520px;
+      height: 62vh;
+      max-height: 520px;
+      overflow: hidden;
+      border-radius: 32px;
+      background: #f8f8f8;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      margin: 30px 0;
+      border: 1px solid #eee;
+    }
+
+    .slides {
+      display: flex;
+      width: 400%;
+      height: 100%;
+      transition: transform 0.9s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .slide {
+      flex: 0 0 25%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 32px;
+      transition: transform 1.2s ease;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.25));
+      pointer-events: none;
+    }
+
+    .hall-name-display {
+      font-size: 1.8rem;
+      font-weight: 600;
+      min-height: 50px;
+      margin: 15px 0 30px;
+      color: #111;
+    }
+
+    .name-text {
+      opacity: 0;
+      transform: translateY(20px);
+      display: inline-block;
+      transition: all 0.55s ease-out;
+    }
+
+    .name-text.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dots {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+      z-index: 10;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.4s;
+      border: 2px solid #fff;
+    }
+
+    .dot.active {
+      background: #e63939;
+      transform: scale(1.4);
+      border-color: #fff;
+      box-shadow: 0 0 15px rgba(230,57,57,0.6);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: rgba(255,255,255,0.98);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .nav-btn {
+      position: relative;
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .nav-btn img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      transition: all 0.3s;
+    }
+
+    .nav-btn.active img {
+      transform: scale(1.18);
+      filter: drop-shadow(0 4px 12px rgba(230,57,57,0.4));
+    }
+
+    .nav-btn.active::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      width: 10px;
+      height: 10px;
+      background: #e63939;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(230,57,57,0.4);
+    }
+
+    .membership-section {
+      padding: 40px 16px;
+      background: #f9f9f9;
+    }
+
+    .section-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      color: #222;
+      text-align: center;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .membership-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.08);
+      padding: 28px 20px;
+      text-align: center;
+      transition: all 0.28s ease;
+      border: 1px solid #eee;
+    }
+
+    .membership-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 14px 38px rgba(0,0,0,0.12);
+    }
+
+    .medal-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .medal { font-size: 5.8rem; line-height: 1; }
+
+    .rank-icon {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      background: #fff;
+      color: #444;
+      font-size: 1.1rem;
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border: 2px solid currentColor;
+    }
+
+    .bronze .rank-icon { color: #cd7f32; }
+    .silver .rank-icon { color: #a8a8a8; }
+    .gold   .rank-icon { color: #d4af37; }
+    .diamond .rank-icon { color: #4fc3f7; }
+
+    .membership-card h3 {
+      font-size: 1.5rem;
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+
+    .enter-button {
+      display: inline-block;
+      width: 100%;
+      max-width: 220px;
+      padding: 13px 0;
+      background: #1a73e8;
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: all 0.25s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .enter-button:hover {
+      background: #1557b0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(26,115,232,0.35);
+    }
+
+    @media (min-width: 520px) {
+      .cards-container { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 960px) {
+      .cards-container { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 90%;
+      max-width: 420px;
+      max-height: 85vh;
+      overflow-y: auto;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 16px;
+      font-size: 32px;
+      color: #aaa;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-close:hover { color: #e63939; }
+
+    .modal-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0 0 20px;
+    }
+
+    .package-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .package-item {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+      border: 1px solid #eee;
+    }
+
+    .package-item h4 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      color: #1a73e8;
+    }
+
+    .package-item p {
+      margin: 4px 0;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .tg-button {
+      display: block;
+      margin: 24px auto 0;
+      padding: 14px 40px;
+      background: #229ED9;
+      color: white;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .tg-button:hover { background: #1a87c2; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <img src="logo.png" alt="PS Group Logo" class="logo-img">
+</div>
+
+<div class="main">
+  <h1 class="title">Choose Your Hall</h1>
+
+  <div class="hall-name-display" id="hallName">
+    <span class="name-text"></span>
+  </div>
+
+  <div class="slider-container">
+    <div class="slides" id="slides">
+      <div class="slide" data-name="🥉 Bronze Hall"><img src="bronze.jpg" alt="Bronze Hall"><div class="overlay"></div></div>
+      <div class="slide" data-name="🥈 Silver Hall"><img src="silver.jpg" alt="Silver Hall"><div class="overlay"></div></div>
+      <div class="slide" data-name="🏅 Gold Hall"><img src="gold.jpg" alt="Gold Hall"><div class="overlay"></div></div>
+      <div class="slide" data-name="💎 Diamond Hall"><img src="diamond.jpg" alt="Diamond Hall"><div class="overlay"></div></div>
+    </div>
+
+    <div class="dots" id="dots">
+      <div class="dot active" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+    </div>
+  </div>
+
+  <section class="membership-section">
+    <h2 class="section-title">Membership Level</h2>
+
+    <div class="cards-container">
+      <div class="membership-card bronze">
+        <div class="medal-container">
+          <span class="medal">🥉</span>
+          <span class="rank-icon">3</span>
+        </div>
+        <h3>Bronze Hall</h3>
+        <button class="enter-button" data-hall="Bronze Hall">Enter</button>
+      </div>
+
+      <div class="membership-card silver">
+        <div class="medal-container">
+          <span class="medal">🥈</span>
+          <span class="rank-icon">2</span>
+        </div>
+        <h3>Silver Hall</h3>
+        <button class="enter-button" data-hall="Silver Hall">Enter</button>
+      </div>
+
+      <div class="membership-card gold">
+        <div class="medal-container">
+          <span class="medal">🏅</span>
+          <span class="rank-icon">1</span>
+        </div>
+        <h3>Gold Hall</h3>
+        <button class="enter-button" data-hall="Gold Hall">Enter</button>
+      </div>
+
+      <div class="membership-card diamond">
+        <div class="medal-container">
+          <span class="medal">💎</span>
+          <span class="rank-icon">★</span>
+        </div>
+        <h3>Diamond Hall</h3>
+        <button class="enter-button" data-hall="Diamond Hall">Enter</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="bottom-nav">
+  <a href="home.html" class="nav-btn"><img src="1st.jpg" alt="Home"></a>
+  <a href="bonus.html" class="nav-btn"><img src="2nd.jpg" alt="Bonus"></a>
+  <a href="collection.html" class="nav-btn"><img src="3rd.jpg" alt="Collection"></a>
+  <a href="level.html" class="nav-btn"><img src="4th.jpg" alt="Level"></a>
+  <a href="profile.html" class="nav-btn"><img src="5th.jpg" alt="Profile"></a>
+</div>
+
+<!-- Modals -->
+<div id="bronzeModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('bronzeModal')">×</button>
+    <h3 class="modal-title">Bronze Hall Packages</h3>
+    <div class="package-list" id="bronzePackages"></div>
+  </div>
+</div>
+
+<div id="silverModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('silverModal')">×</button>
+    <h3 class="modal-title">Silver Hall Packages</h3>
+    <div class="package-list" id="silverPackages"></div>
+  </div>
+</div>
+
+<div id="goldModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('goldModal')">×</button>
+    <h3 class="modal-title">Gold Hall Packages</h3>
+    <div class="package-list" id="goldPackages"></div>
+  </div>
+</div>
+
+<div id="diamondModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('diamondModal')">×</button>
+    <h3 class="modal-title">Diamond Hall Packages</h3>
+    <div class="package-list" id="diamondPackages"></div>
+  </div>
+</div>
+
+<!-- Telegram Activation Modal -->
+<div id="telegramModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('telegramModal')">×</button>
+    <h3>Activation Required</h3>
+    <p>To activate this Hall please contact on our telegram</p>
+    <a href="https://t.me/Customersupportneptune" target="_blank" class="tg-button">
+      Open Telegram →
+    </a>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+  authDomain: "bdclash-80f60.firebaseapp.com",
+  projectId: "bdclash-80f60",
+  storageBucket: "bdclash-80f60.firebasestorage.app",
+  messagingSenderId: "842550397820",
+  appId: "1:842550397820:web:285ed51565a4d71d34b2f9",
+  measurementId: "G-DS97G2VVZ4"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Slider Logic
+document.addEventListener("DOMContentLoaded", () => {
+  const slides = document.getElementById("slides");
+  const nameElement = document.querySelector("#hallName .name-text");
+  const dots = document.querySelectorAll("#dots .dot");
+
+  let current = 0;
+  const total = 4;
+  let autoInterval;
+
+  function updateSlide(idx) {
+    slides.style.transform = `translateX(-${idx * 25}%)`;
+    dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+
+    const slide = document.querySelectorAll(".slide")[idx];
+    const newName = slide.getAttribute("data-name") || "Hall";
+
+    nameElement.classList.remove("visible");
+    setTimeout(() => {
+      nameElement.textContent = newName;
+      setTimeout(() => nameElement.classList.add("visible"), 100);
+    }, 400);
+  }
+
+  function startAuto() {
+    autoInterval = setInterval(() => {
+      current = (current + 1) % total;
+      updateSlide(current);
+    }, 5000);
+  }
+
+  dots.forEach((dot, idx) => {
+    dot.addEventListener("click", () => {
+      clearInterval(autoInterval);
+      current = idx;
+      updateSlide(current);
+      startAuto();
+    });
+  });
+
+  document.querySelector(".slider-container").addEventListener("mouseenter", () => clearInterval(autoInterval));
+  document.querySelector(".slider-container").addEventListener("mouseleave", () => startAuto());
+
+  updateSlide(0);
+  startAuto();
+
+  // Bottom nav active
+  const currentPath = window.location.pathname.split("/").pop() || "collection.html";
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    if (btn.getAttribute("href")?.includes(currentPath)) btn.classList.add("active");
+  });
+});
+
+// Modal Control
+function openModal(modalId) {
+  document.getElementById(modalId).style.display = "flex";
+  setTimeout(() => document.getElementById(modalId).classList.add("visible"), 10);
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.classList.remove("visible");
+  setTimeout(() => modal.style.display = "none", 300);
+}
+
+// ==================== MAIN FUNCTION - Bronze Free সবার জন্য উন্মুক্ত ====================
+async function checkAndEnter(packageName) {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please login first");
+    return;
+  }
+
+  // 🔥 Bronze Free প্যাকেজ → সবার জন্য উন্মুক্ত (কোনো চেক ছাড়াই task2.html এ যাবে)
+  if (packageName.toLowerCase() === "bronze free" || packageName === "Bronze Free") {
+    window.location.href = "task2.html";
+    return;
+  }
+
+  // অন্য সব প্যাকেজের জন্য সাধারণ membership চেক
+  try {
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if (!userDoc.exists) {
+      alert("User profile not found");
+      return;
+    }
+
+    const data = userDoc.data();
+    const membership = data.membership || {};
+
+    if (membership.packageName === packageName) {
+      window.location.href = "task.html";
+    } else {
+      openModal("telegramModal");
+    }
+  } catch (err) {
+    console.error("Membership check error:", err);
+    alert("Error checking membership status");
+  }
+}
+
+// Load Packages for Hall
+async function loadPackagesForHall(hallName, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '<p style="color:#777; text-align:center;">Loading packages...</p>';
+
+  try {
+    const snap = await db.collection("packages")
+      .where("hall", "==", hallName)
+      .get();
+
+    container.innerHTML = "";
+
+    if (snap.empty) {
+      container.innerHTML = '<p style="color:#888; text-align:center;">No packages available for this hall yet.</p>';
+      return;
+    }
+
+    snap.forEach(doc => {
+      const pkg = doc.data();
+      const item = document.createElement("div");
+      item.className = "package-item";
+      item.innerHTML = `
+        <h4>${pkg.name}</h4>
+        <p><strong>Price:</strong> ৳${pkg.price || 0}</p>
+        <p><strong>Commission Rate:</strong> ${pkg.commissionRate || "N/A"}</p>
+        <p><strong>Tasks:</strong> ${pkg.taskCount || 0}</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('${pkg.name}')">
+          Enter
+        </button>
+      `;
+      container.appendChild(item);
+    });
+  } catch (err) {
+    console.error("Package load error:", err);
+    container.innerHTML = '<p style="color:#e63939; text-align:center;">Error loading packages</p>';
+  }
+}
+
+// Enter Button Click Handler
+document.querySelectorAll(".enter-button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const hall = btn.getAttribute("data-hall");
+
+    let modalId = "";
+    let containerId = "";
+
+    if (hall === "Bronze Hall") {
+      modalId = "bronzeModal";
+      containerId = "bronzePackages";
+    } else if (hall === "Silver Hall") {
+      modalId = "silverModal";
+      containerId = "silverPackages";
+    } else if (hall === "Gold Hall") {
+      modalId = "goldModal";
+      containerId = "goldPackages";
+    } else if (hall === "Diamond Hall") {
+      modalId = "diamondModal";
+      containerId = "diamondPackages";
+    }
+
+    if (modalId && containerId) {
+      loadPackagesForHall(hall, containerId);
+      openModal(modalId);
+    }
+  });
+});
+
+// Close modal when clicking outside
+document.querySelectorAll(".modal-overlay").forEach(modal => {
+  modal.addEventListener("click", e => {
+    if (e.target === modal) {
+      closeModal(modal.id);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

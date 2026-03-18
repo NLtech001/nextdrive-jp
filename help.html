@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Help Center - Next Drive</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .header {
+      height: 65px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 500;
+      color: #e63939;
+      text-decoration: none;
+    }
+
+    .back-link span {
+      margin-left: 12px;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      text-align: center;
+      margin: 20px 0 40px;
+      color: #1a1a1a;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 40px;
+    }
+
+    .faq-item {
+      background: white;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+
+    .faq-header {
+      padding: 18px 24px;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+    }
+
+    .faq-header:hover {
+      background: #f8f9fa;
+    }
+
+    .faq-header::after {
+      content: '▼';
+      font-size: 14px;
+      transition: transform 0.4s ease;
+    }
+
+    .faq-item.active .faq-header::after {
+      transform: rotate(180deg);
+    }
+
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 24px;
+      background: #fafafa;
+      transition: max-height 0.5s ease, padding 0.3s ease;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .faq-item.active .faq-content {
+      max-height: 800px; /* adjust according to content length */
+      padding: 24px;
+    }
+
+    .telegram-section {
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .telegram-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 16px 40px;
+      background: linear-gradient(90deg, #0088cc, #00aaff);
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(0,136,204,0.3);
+      transition: all 0.3s;
+    }
+
+    .telegram-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,136,204,0.4);
+    }
+
+    .telegram-icon {
+      width: 36px;
+      height: 36px;
+      margin-right: 14px;
+    }
+
+    @media (max-width: 500px) {
+      h1 { font-size: 28px; }
+      .faq-header { font-size: 16px; padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <a href="home.html" class="back-link">
+      ← <span>Help Center</span>
+    </a>
+  </header>
+
+  <div class="container">
+    <h1>Help Center</h1>
+    <p class="subtitle">Check the options below for detailed information.</p>
+
+    <!-- FAQ Items -->
+    <div class="faq-item">
+      <div class="faq-header">About Agent Mode</div>
+      <div class="faq-content">
+        Agent Mode is a special feature that allows automated assistance and faster processing of certain tasks on the platform. It is available for verified users with good reputation scores.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header">About Deposit</div>
+      <div class="faq-content">
+        Deposits can be made through various methods including bKash, Nagad, Bank Transfer, and USDT. Minimum deposit amount is ৳100. All deposits are processed instantly or within 30 minutes.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header">Rules and Regulation</div>
+      <div class="faq-content">
+        All users must follow platform guidelines. Any fraudulent activity, multiple account creation, or violation of terms will result in permanent ban and fund freezing. Users are responsible for maintaining account security.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header">About Frozen</div>
+      <div class="faq-content">
+        Accounts may be frozen due to suspicious activity, incomplete KYC, low reputation score, or violation of rules. To unfreeze, contact support via Telegram and provide required verification documents.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header">About Withdrawal</div>
+      <div class="faq-content">
+        Withdrawals are processed to bKash, Nagad, Bank, or USDT. Minimum withdrawal: ৳500. Maximum withdrawal has no limitlimit. You can withdraw all of yours balance. Withdrawal time : 24 hours.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header">About Exclusive promotion</div>
+      <div class="faq-content">
+        Exclusive promotions are available only for high-reputation users or through special invitation codes. These include bonus percentages, cashback, and priority withdrawal.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header">About Promotion</div>
+      <div class="faq-content">
+        Regular promotions include referral bonuses, daily login rewards, and deposit bonuses. Check the promotion section in the app or contact support for current active offers.
+      </div>
+    </div>
+
+    <!-- Telegram Support at the bottom -->
+    <div class="telegram-section">
+      <a href="https://t.me/Customersupportneptune" class="telegram-btn" target="_blank">
+        <img src="https://www.clipartmax.com/png/middle/281-2816929_paper-plane-ios-9-telegram-icon.png" 
+             alt="Telegram" class="telegram-icon">
+        Contact Telegram Support
+      </a>
+      <p style="margin-top: 20px; font-size: 14px; color: #666;">
+        For any unresolved queries or account issues, our team is available 24/7 on Telegram.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Accordion functionality with smooth animation
+    document.querySelectorAll('.faq-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+
+        // Close other items if you want only one open at a time
+        // document.querySelectorAll('.faq-item').forEach(i => {
+        //   if (i !== item) i.classList.remove('active');
+        // });
+      });
+    });
+  </script>
+
+</body>
+</html>

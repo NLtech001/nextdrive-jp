@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -414,15 +414,17 @@
     <h2 class="section-title">Membership Level</h2>
 
     <div class="cards-container">
+      <!-- Bronze Hall - No modal, direct redirect -->
       <div class="membership-card bronze">
         <div class="medal-container">
           <span class="medal">🥉</span>
           <span class="rank-icon">3</span>
         </div>
         <h3>Bronze Hall</h3>
-        <button class="enter-button" data-hall="Bronze Hall">Enter</button>
+        <button class="enter-button" onclick="window.location.href='task2.html'">Enter</button>
       </div>
 
+      <!-- Silver Hall - Modal remains -->
       <div class="membership-card silver">
         <div class="medal-container">
           <span class="medal">🥈</span>
@@ -432,6 +434,7 @@
         <button class="enter-button" data-hall="Silver Hall">Enter</button>
       </div>
 
+      <!-- Gold Hall - Modal remains -->
       <div class="membership-card gold">
         <div class="medal-container">
           <span class="medal">🏅</span>
@@ -441,6 +444,7 @@
         <button class="enter-button" data-hall="Gold Hall">Enter</button>
       </div>
 
+      <!-- Diamond Hall - Modal remains -->
       <div class="membership-card diamond">
         <div class="medal-container">
           <span class="medal">💎</span>
@@ -461,15 +465,7 @@
   <a href="profile.html" class="nav-btn"><img src="5th.jpg" alt="Profile"></a>
 </div>
 
-<!-- Modals -->
-<div id="bronzeModal" class="modal-overlay">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal('bronzeModal')">×</button>
-    <h3 class="modal-title">Bronze Hall Packages</h3>
-    <div class="package-list" id="bronzePackages"></div>
-  </div>
-</div>
-
+<!-- Modals (Bronze modal removed) -->
 <div id="silverModal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('silverModal')">×</button>
@@ -526,7 +522,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Slider Logic
+// Slider Logic (আগের মতোই)
 document.addEventListener("DOMContentLoaded", () => {
   const slides = document.getElementById("slides");
   const nameElement = document.querySelector("#hallName .name-text");
@@ -579,7 +575,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Modal Control
+// Modal Control (Bronze modal removed)
 function openModal(modalId) {
   document.getElementById(modalId).style.display = "flex";
   setTimeout(() => document.getElementById(modalId).classList.add("visible"), 10);
@@ -591,21 +587,22 @@ function closeModal(modalId) {
   setTimeout(() => modal.style.display = "none", 300);
 }
 
-// ==================== MAIN FUNCTION - Bronze Free সবার জন্য উন্মুক্ত ====================
+// ==================== MAIN FUNCTION ====================
 async function checkAndEnter(packageName) {
+  // Bronze Hall-এর জন্য modal বাদ দেওয়া হয়েছে, সরাসরি task2.html-এ যাবে
+  // অন্য হলের জন্য modal + package চেক আগের মতোই
+  if (packageName.toLowerCase().includes("bronze")) {
+    window.location.href = "task2.html";
+    return;
+  }
+
+  // Silver/Gold/Diamond-এর জন্য আগের লজিক
   const user = auth.currentUser;
   if (!user) {
     alert("Please login first");
     return;
   }
 
-  // 🔥 Bronze Free প্যাকেজ → সবার জন্য উন্মুক্ত (কোনো চেক ছাড়াই task2.html এ যাবে)
-  if (packageName.toLowerCase() === "bronze free" || packageName === "Bronze Free") {
-    window.location.href = "task2.html";
-    return;
-  }
-
-  // অন্য সব প্যাকেজের জন্য সাধারণ membership চেক
   try {
     const userDoc = await db.collection("users").doc(user.uid).get();
     if (!userDoc.exists) {
@@ -627,7 +624,7 @@ async function checkAndEnter(packageName) {
   }
 }
 
-// Load Packages for Hall
+// Load Packages for Hall (Silver, Gold, Diamond only)
 async function loadPackagesForHall(hallName, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = '<p style="color:#777; text-align:center;">Loading packages...</p>';
@@ -666,18 +663,22 @@ async function loadPackagesForHall(hallName, containerId) {
   }
 }
 
-// Enter Button Click Handler
+// Enter Button Click Handler (Bronze direct, others modal)
 document.querySelectorAll(".enter-button").forEach(btn => {
   btn.addEventListener("click", () => {
     const hall = btn.getAttribute("data-hall");
 
+    if (hall === "Bronze Hall") {
+      // Bronze-এর জন্য direct redirect (modal বাদ)
+      window.location.href = "task2.html";
+      return;
+    }
+
+    // Silver/Gold/Diamond-এর জন্য modal
     let modalId = "";
     let containerId = "";
 
-    if (hall === "Bronze Hall") {
-      modalId = "bronzeModal";
-      containerId = "bronzePackages";
-    } else if (hall === "Silver Hall") {
+    if (hall === "Silver Hall") {
       modalId = "silverModal";
       containerId = "silverPackages";
     } else if (hall === "Gold Hall") {

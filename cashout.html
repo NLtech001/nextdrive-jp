@@ -12,7 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* আগের স্টাইল একই রাখা হয়েছে – কোনো পরিবর্তন নেই */
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Poppins', sans-serif;
@@ -35,6 +34,370 @@
       margin-top: 70px;
       padding: 30px 20px 20px;
       text-align: center;
+      background: #ffffff;
+    }
+    .balance-title { font-size: 16px; color: #666; margin-bottom: 8px; }
+    .balance-amount { font-size: 32px; font-weight: 700; color: #1a73e8; }
+    .methods-section { padding: 0 20px 20px; }
+    .methods-title { font-size: 18px; font-weight: 600; margin: 20px 0 12px; color: #333; }
+    .method-list { display: flex; flex-direction: column; gap: 12px; }
+    .method-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 16px; cursor: pointer;
+      border: 2px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .method-item.selected {
+      border-color: #1a73e8;
+      background: rgba(26,115,232,0.05);
+    }
+    .method-item .check {
+      width: 24px; height: 24px;
+      background: #eee;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: transparent;
+      border: 2px solid #ccc;
+    }
+    .method-item.selected .check {
+      background: #1a73e8;
+      color: white;
+      border-color: #1a73e8;
+    }
+    .payment-details-section {
+      padding: 0 20px 20px;
+      display: none;
+    }
+    .input-group {
+      margin-bottom: 16px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 15px;
+      color: #444;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #fff;
+    }
+    .input-group input:focus {
+      border-color: #1a73e8;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.12);
+    }
+    .amount-section { padding: 0 20px 30px; }
+    .amount-label { font-size: 16px; color: #555; margin-bottom: 12px; }
+    .amount-input-wrapper {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex; align-items: center;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .currency-symbol { font-size: 24px; color: #1a73e8; margin-right: 12px; font-weight: bold; }
+    #amountInput {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: #222; font-size: 24px; font-weight: 600;
+    }
+    .max-btn {
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-left: 12px;
+    }
+    .submit-btn {
+      position: fixed; bottom: 20px; left: 20px; right: 20px;
+      background: linear-gradient(90deg, #1a73e8, #0d47a1);
+      color: white; font-size: 18px; font-weight: 600;
+      padding: 16px; border: none; border-radius: 50px;
+      cursor: pointer; box-shadow: 0 8px 25px rgba(26,115,232,0.3);
+    }
+    .submit-btn:disabled {
+      background: #aaa;
+      box-shadow: none;
+      opacity: 0.65;
+    }
+    .pending-message {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.85); color: #0f0; padding: 30px 40px;
+      border-radius: 16px; font-size: 18px; font-weight: 500;
+      text-align: center; display: none; z-index: 2000;
+      max-width: 90%;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="profile.html" class="back-btn">←</a>
+  <div class="header-title">Cash Out</div>
+</header>
+
+<div class="balance-section">
+  <div class="balance-title">Account Balance</div>
+  <div class="balance-amount" id="balanceDisplay">৳ 0.00</div>
+</div>
+
+<div class="methods-section">
+  <div class="methods-title">Select Withdrawal Method</div>
+  <div class="method-list" id="methodList">
+    <div class="method-item selected" data-method="bkash">
+      <span>bKash</span>
+      <div class="check">✔</div>
+    </div>
+    <div class="method-item" data-method="nagad">
+      <span>Nagad</span>
+      <div class="check">✔</div>
+    </div>
+    <div class="method-item" data-method="bank">
+      <span>Bank Transfer</span>
+      <div class="check">✔</div>
+    </div>
+  </div>
+</div>
+
+<div class="payment-details-section" id="paymentDetailsSection">
+  <div class="methods-title" id="detailsTitle">Enter Payment Details</div>
+  <div id="dynamicFields"></div>
+</div>
+
+<div class="amount-section">
+  <div class="amount-label">Enter Amount (Minimum ৳500 – up to your real balance)</div>
+  <div class="amount-input-wrapper">
+    <span class="currency-symbol">৳</span>
+    <input type="tel" id="amountInput" placeholder="0" inputmode="numeric" />
+    <button class="max-btn" id="maxBtn">MAX</button>
+  </div>
+</div>
+
+<button class="submit-btn" id="cashOutBtn" disabled>Cash Out</button>
+
+<div class="pending-message" id="pendingMsg">
+  Your withdrawal request is pending.<br>Please wait for admin approval.
+</div>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+  authDomain: "bdclash-80f60.firebaseapp.com",
+  projectId: "bdclash-80f60",
+  storageBucket: "bdclash-80f60.firebasestorage.app",
+  messagingSenderId: "842550397820",
+  appId: "1:842550397820:web:285ed51565a4d71d34b2f9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const MIN_AMOUNT = 500;
+let realBalance = 0;           // শুধু real balance (withdraw এটা থেকে হবে)
+let displayBalance = 0;        // profile-এ যা দেখায় (demo + real)
+
+// Load user data
+auth.onAuthStateChanged(user => {
+  if (user) {
+    db.collection("users").doc(user.uid).onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+
+        realBalance = Number(data.balance || 0);          // real balance
+        const demoBalance = Number(data.demoBalance || 0); // demo (withdraw-এ যাবে না)
+
+        // paid package চেক (তোমার profile-এর লজিক অনুযায়ী পরিবর্তন করো)
+        const membership = data.membership || {};
+        const pkgName = (membership.packageName || "Bronze").toLowerCase().trim();
+        const hasPaidPackage = pkgName !== "bronze" && pkgName !== "" && 
+          (!membership.expiresAt || new Date(membership.expiresAt) > new Date());
+
+        // Cash out page-এ withdrawable amount = শুধু real balance
+        document.getElementById("balanceDisplay").textContent = 
+          "৳ " + realBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        validateForm();
+      }
+    });
+
+    // দিনে ১টা request চেক (আগের মতোই)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    db.collection("cashout_requests")
+      .where("userId", "==", user.uid)
+      .where("requestedAt", ">=", firebase.firestore.Timestamp.fromDate(todayStart))
+      .where("requestedAt", "<=", firebase.firestore.Timestamp.fromDate(todayEnd))
+      .get()
+      .then(snapshot => {
+        const hasTodayRequest = !snapshot.empty;
+        if (hasTodayRequest) {
+          document.getElementById('cashOutBtn').disabled = true;
+          document.getElementById('cashOutBtn').textContent = "Today’s Request Sent";
+          alert("আপনি আজকের মধ্যে ইতিমধ্যে একটি withdrawal request দিয়েছেন।\nদয়া করে কাল চেষ্টা করুন।");
+        }
+        validateForm();
+      })
+      .catch(err => console.error("Error checking requests:", err));
+  } else {
+    window.location.href = "index.html";
+  }
+});
+
+// Method selection
+document.querySelectorAll('.method-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.method-item').forEach(i => i.classList.remove('selected'));
+    item.classList.add('selected');
+    selectedMethod = item.dataset.method;
+    updatePaymentFields();
+    validateForm();
+  });
+});
+
+function updatePaymentFields() {
+  const section = document.getElementById('paymentDetailsSection');
+  const container = document.getElementById('dynamicFields');
+  container.innerHTML = '';
+
+  section.style.display = 'block';
+
+  if (selectedMethod === 'bkash' || selectedMethod === 'nagad') {
+    document.getElementById('detailsTitle').textContent = `${selectedMethod.toUpperCase()} Number`;
+    container.innerHTML = `
+      <div class="input-group">
+        <label for="mobileNumber">${selectedMethod.toUpperCase()} Mobile Number</label>
+        <input type="tel" id="mobileNumber" placeholder="01XXXXXXXXX" inputmode="numeric" maxlength="11" />
+      </div>
+    `;
+  } else if (selectedMethod === 'bank') {
+    document.getElementById('detailsTitle').textContent = 'Bank Account Details';
+    container.innerHTML = `
+      <div class="input-group">
+        <label for="bankName">Bank Name</label>
+        <input type="text" id="bankName" placeholder="e.g. Dutch-Bangla Bank, Islami Bank" />
+      </div>
+      <div class="input-group">
+        <label for="accountName">Account Holder Name</label>
+        <input type="text" id="accountName" placeholder="Your full name as in bank" />
+      </div>
+      <div class="input-group">
+        <label for="accountNumber">Account Number</label>
+        <input type="text" id="accountNumber" placeholder="Your bank account number" />
+      </div>
+      <div class="input-group">
+        <label for="routingNumber">Routing / Branch Code (optional)</label>
+        <input type="text" id="routingNumber" placeholder="e.g. 090261721" />
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('#paymentDetailsSection input').forEach(el => {
+    el.addEventListener('input', validateForm);
+  });
+}
+
+function validateForm() {
+  const amount = parseFloat(document.getElementById('amountInput').value) || 0;
+  let valid = amount >= MIN_AMOUNT && amount <= realBalance;   // শুধু real balance চেক
+
+  if (selectedMethod === 'bkash' || selectedMethod === 'nagad') {
+    const num = document.getElementById('mobileNumber')?.value?.trim() || '';
+    valid = valid && num.length === 11 && num.startsWith('01');
+  } else if (selectedMethod === 'bank') {
+    const bank   = document.getElementById('bankName')?.value?.trim() || '';
+    const holder = document.getElementById('accountName')?.value?.trim() || '';
+    const acc    = document.getElementById('accountNumber')?.value?.trim() || '';
+    valid = valid && bank.length > 2 && holder.length > 2 && acc.length >= 8;
+  }
+
+  document.getElementById('cashOutBtn').disabled = !valid;
+}
+
+// Amount input + MAX
+document.getElementById('amountInput').addEventListener('input', validateForm);
+
+document.getElementById('maxBtn').addEventListener('click', () => {
+  document.getElementById('amountInput').value = realBalance.toFixed(2);   // শুধু real balance
+  validateForm();
+});
+
+// Submit Cash Out Request
+document.getElementById('cashOutBtn').addEventListener('click', async () => {
+  const amount = parseFloat(document.getElementById('amountInput').value);
+  const btn = document.getElementById('cashOutBtn');
+
+  if (amount < MIN_AMOUNT || amount > realBalance) {
+    alert(`Minimum ৳${MIN_AMOUNT} withdraw করতে হবে এবং আপনার real balance-এর বেশি হতে পারবে না।`);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Processing...";
+
+  let paymentDetails = {};
+  if (selectedMethod === 'bkash' || selectedMethod === 'nagad') {
+    paymentDetails.mobileNumber = document.getElementById('mobileNumber').value.trim();
+  } else if (selectedMethod === 'bank') {
+    paymentDetails = {
+      bankName: document.getElementById('bankName').value.trim(),
+      accountName: document.getElementById('accountName').value.trim(),
+      accountNumber: document.getElementById('accountNumber').value.trim(),
+      routingNumber: document.getElementById('routingNumber').value.trim() || null
+    };
+  }
+
+  try {
+    await db.collection("cashout_requests").add({
+      userId: auth.currentUser.uid,
+      userPhone: auth.currentUser.phoneNumber || "unknown",
+      amount: amount,
+      method: selectedMethod,
+      paymentDetails: paymentDetails,
+      status: "pending",
+      requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('pendingMsg').style.display = 'block';
+
+    setTimeout(() => {
+      document.getElementById('pendingMsg').style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = "Today’s Request Sent";
+      document.getElementById('amountInput').value = '';
+      document.querySelectorAll('#paymentDetailsSection input').forEach(i => i.value = '');
+      alert(`৳${amount} withdrawal request সফলভাবে পাঠানো হয়েছে!\nআজ আর কোনো request দেওয়া যাবে না।`);
+    }, 5000);
+
+  } catch (error) {
+    alert("Error: " + error.message);
+    btn.disabled = false;
+    btn.textContent = "Cash Out";
+  }
+});
+
+// Initial load
+updatePaymentFields();
+validateForm();
+</script>
+
+</body>
+</html>      text-align: center;
       background: #ffffff;
     }
     .balance-title { font-size: 16px; color: #666; margin-bottom: 8px; }

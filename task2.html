@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bronze Free Tasks - PS Group</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #f8f9fa; color: #111; min-height: 100vh; padding-bottom: 20px; }
+    header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: #ffffff; box-shadow: 0 2px 15px rgba(0,0,0,0.08); display: flex; align-items: center; padding: 0 20px; z-index: 1000; }
+    .back-btn { font-size: 28px; color: #333; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .header-logo { max-height: 48px; position: absolute; left: 50%; transform: translateX(-50%); }
+
+    .main { padding-top: 90px; padding: 20px; max-width: 480px; margin: 0 auto; }
+    .package-header { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 20px; color: #e63939; }
+
+    .stats { display: flex; justify-content: space-around; background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 15px; }
+    .stat-box { text-align: center; }
+    .stat-box h3 { font-size: 1.4rem; font-weight: 700; }
+    .stat-box p { font-size: 0.9rem; color: #666; }
+
+    /* Gift Button Styles - Premium Gorgeous Look */
+    .gift-section { text-align: center; margin: 0 auto 30px; max-width: 320px; }
+    .gift-btn {
+      position: relative;
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53, #ff6b6b);
+      background-size: 200% 200%;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+      transition: all 0.4s ease;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      animation: gradientFlow 6s ease infinite;
+    }
+    .gift-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+    }
+    .gift-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+      box-shadow: none;
+      animation: none;
+      opacity: 0.7;
+    }
+    .gift-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .gift-btn:hover::before { opacity: 1; }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .task-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .task-card {
+      background: white; border-radius: 16px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .task-name { font-weight: 600; font-size: 1.05rem; }
+
+    .complete-btn {
+      background: #1a73e8; color: white; border: none; padding: 10px 18px;
+      border-radius: 50px; font-weight: 600; cursor: pointer;
+    }
+    
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .modal-content { background: white; border-radius: 20px; width: 92%; max-width: 420px; max-height: 85vh; overflow-y: auto; padding: 25px; position: relative; }
+    .modal-close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #999; }
+    .submit-btn { width: 100%; padding: 16px; background: #e63939; color: white; border: none; border-radius: 50px; font-size: 1.1rem; font-weight: 700; margin-top: 20px; cursor: pointer; }
+
+    .modal-image { max-width: 100%; height: auto; border-radius: 12px; margin: 15px 0; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .modal-detail { margin: 12px 0; font-size: 1rem; }
+    .modal-detail strong { color: #1a73e8; }
+
+    .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="back-btn" onclick="goBack()">←</div>
+  <img src="logo.png" alt="PS Group Logo" class="header-logo">
+</header>
+
+<div class="main">
+  <div class="package-header" id="currentPackage">Bronze Free Tasks</div>
+
+  <div class="stats">
+    <div class="stat-box"><h3 id="balanceDisplay">৳0.00</h3><p>Balance</p></div>
+    <div class="stat-box"><h3 id="earningsDisplay">৳0.00</h3><p>Earnings</p></div>
+    <div class="stat-box"><h3 id="completedDisplay">0/25</h3><p>Completed / Total</p></div>
+  </div>
+
+  <!-- Premium Gift Box Button Section -->
+  <div class="gift-section" id="giftSection" style="display: none;">
+    <button id="giftBtn" class="gift-btn" disabled>
+      🎁 Claim ৳157 Gift
+    </button>
+  </div>
+
+  <div class="task-list" id="taskList"></div>
+</div>
+
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    
+    <h2 id="modalTaskName">Task Name</h2>
+    
+    <div id="modalImageContainer" style="text-align:center; display:none;">
+      <img id="modalImage" class="modal-image" src="" alt="Task Image">
+    </div>
+    
+    <p id="modalDescription" style="margin:15px 0; line-height:1.5;"></p>
+    
+    <div class="modal-detail"><strong>Car Brand:</strong> <span id="modalCarBrand">N/A</span></div>
+    <div class="modal-detail"><strong>Car Rating:</strong> <span id="modalRatings">N/A</span></div>
+    <div class="modal-detail"><strong>Service Center:</strong> <span id="modalServiceCenter">N/A</span></div>
+    
+    <p style="margin-top:15px; font-size:1.1rem;">
+      <strong>Profit:</strong> <span id="modalProfit" style="color:#e63939; font-weight:700;">৳0</span>
+    </p>
+
+    <button class="submit-btn" onclick="submitTask()">Submit Task</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+  authDomain: "bdclash-80f60.firebaseapp.com",
+  projectId: "bdclash-80f60",
+  storageBucket: "bdclash-80f60.firebasestorage.app",
+  messagingSenderId: "842550397820",
+  appId: "1:842550397820:web:285ed51565a4d71d34b2f9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentTaskId = null;
+let currentProfit = 0;
+let unsubscribeUser = null;
+let unsubscribeTasks = null;
+const GIFT_AMOUNT = 157;
+const REQUIRED_COMPLETED = 22;
+
+function goBack() { 
+  window.location.href = "collection.html"; 
+}
+
+function startListening() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const userRef = db.collection("users").doc(user.uid);
+
+  unsubscribeUser = userRef.onSnapshot(doc => {
+    if (!doc.exists) {
+      document.getElementById("currentPackage").textContent = "No Account";
+      document.getElementById("taskList").innerHTML = '<div class="empty-state">Account not found</div>';
+      document.getElementById("balanceDisplay").textContent = "৳0.00";
+      document.getElementById("earningsDisplay").textContent = "৳0.00";
+      document.getElementById("giftSection").style.display = "none";
+      return;
+    }
+
+    const data = doc.data() || {};
+
+    const bal = Number(data.balance || 0);
+    const earn = Number(data.earnings || 0);
+    const completedTasks = data.completedTasks || [];
+    const completedCount = completedTasks.length;
+    const giftClaimed = data.giftClaimed === true;
+
+    document.getElementById("balanceDisplay").textContent = `৳${bal.toFixed(2)}`;
+    document.getElementById("earningsDisplay").textContent = `৳${earn.toFixed(2)}`;
+    document.getElementById("completedDisplay").textContent = `${completedCount}/25`;
+
+    // Gift Button Logic
+    const giftBtn = document.getElementById("giftBtn");
+    const giftSection = document.getElementById("giftSection");
+
+    if (giftClaimed) {
+      giftSection.style.display = "none"; // already claimed → hide
+    } else {
+      giftSection.style.display = "block";
+      if (completedCount >= REQUIRED_COMPLETED) {
+        giftBtn.disabled = false;
+        giftBtn.style.background = "linear-gradient(135deg, #ff6b6b, #ff8e53, #ff6b6b)";
+        giftBtn.style.animation = "gradientFlow 6s ease infinite";
+        giftBtn.textContent = "🎁 Claim ৳157 Gift";
+      } else {
+        giftBtn.disabled = true;
+        giftBtn.style.background = "#aaa";
+        giftBtn.style.animation = "none";
+        giftBtn.textContent = "🔒 Locked (Need 22+ Tasks)";
+      }
+    }
+
+    document.getElementById("currentPackage").textContent = "Bronze Free Tasks";
+
+    if (unsubscribeTasks) unsubscribeTasks();
+
+    unsubscribeTasks = db.collection("tasks")
+      .where("bronzeTask", "==", true)
+      .onSnapshot(snap => {
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = "";
+
+        if (snap.empty) {
+          taskList.innerHTML = `
+            <div class="empty-state">
+              <h3>No Bronze Free Tasks</h3>
+              <p>Tasks will appear here once added from Task Maker (bronzeTask selected).</p>
+            </div>`;
+          return;
+        }
+
+        snap.forEach(taskDoc => {
+          const task = taskDoc.data();
+          const isCompleted = completedTasks.includes(taskDoc.id);
+
+          const div = document.createElement("div");
+          div.className = "task-card";
+          div.innerHTML = `
+            <div class="task-name">${task.taskName || "Untitled Task"}</div>
+            ${isCompleted ? 
+              `<span style="color:#4caf50; font-weight:600;">✓ Completed</span>` : 
+              `<button class="complete-btn" onclick="openTaskModal('${taskDoc.id}')">
+                Complete Task
+              </button>`
+            }
+          `;
+          taskList.appendChild(div);
+        });
+      });
+  }, err => {
+    console.error("User snapshot error:", err);
+  });
+}
+
+async function openTaskModal(taskId) {
+  currentTaskId = taskId;
+
+  try {
+    const taskDoc = await db.collection("tasks").doc(taskId).get();
+    if (!taskDoc.exists) {
+      alert("Task not found!");
+      return;
+    }
+
+    const task = taskDoc.data();
+    currentProfit = task.profit || 0;
+
+    document.getElementById("modalTaskName").textContent = task.taskName || "Untitled Task";
+    document.getElementById("modalDescription").innerHTML = (task.description || "No description available").replace(/\n/g, '<br>');
+
+    document.getElementById("modalProfit").textContent = "৳" + currentProfit.toFixed(2);
+
+    const imgContainer = document.getElementById("modalImageContainer");
+    const img = document.getElementById("modalImage");
+    if (task.imageUrl && task.imageUrl.trim() !== "") {
+      img.src = task.imageUrl;
+      imgContainer.style.display = "block";
+    } else {
+      imgContainer.style.display = "none";
+    }
+
+    document.getElementById("modalCarBrand").textContent = task.carBrand || "N/A";
+    document.getElementById("modalRatings").textContent = task.carRating ? task.carRating + " ★" : "N/A";
+    document.getElementById("modalServiceCenter").textContent = task.serviceCenter || "N/A";
+
+    document.getElementById("taskModal").style.display = "flex";
+
+  } catch (err) {
+    console.error(err);
+    alert("Error loading task details");
+  }
+}
+
+function closeModal() {
+  document.getElementById("taskModal").style.display = "none";
+}
+
+async function submitTask() {
+  const user = auth.currentUser;
+  if (!user || !currentTaskId) return;
+
+  try {
+    const userRef = db.collection("users").doc(user.uid);
+    const userDoc = await userRef.get();
+    const data = userDoc.data() || {};
+
+    const newBalance  = (data.balance  || 0) + currentProfit;
+    const newEarnings = (data.earnings || 0) + currentProfit;
+    let completed = data.completedTasks || [];
+    
+    if (!completed.includes(currentTaskId)) {
+      completed.push(currentTaskId);
+    }
+
+    await userRef.update({
+      balance: newBalance,
+      earnings: newEarnings,
+      completedTasks: completed
+    });
+
+    alert(`Task completed!\n৳${currentProfit} added to balance & earnings`);
+    closeModal();
+  } catch (err) {
+    alert("Error: " + err.message);
+    console.error(err);
+  }
+}
+
+// Gift Claim Function
+async function claimGift() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    const userRef = db.collection("users").doc(user.uid);
+    const userDoc = await userRef.get();
+    const data = userDoc.data() || {};
+
+    if (data.giftClaimed === true) {
+      alert("You already claimed this gift!");
+      return;
+    }
+
+    const completedCount = (data.completedTasks || []).length;
+    if (completedCount < REQUIRED_COMPLETED) {
+      alert(`You need at least ${REQUIRED_COMPLETED} tasks completed!`);
+      return;
+    }
+
+    const newBalance = (data.balance || 0) + GIFT_AMOUNT;
+    const newEarnings = (data.earnings || 0) + GIFT_AMOUNT;
+
+    await userRef.update({
+      balance: newBalance,
+      earnings: newEarnings,
+      giftClaimed: true
+    });
+
+    alert(`Congratulations! ৳${GIFT_AMOUNT} Gift added to your balance & earnings!`);
+    document.getElementById("giftSection").style.display = "none";
+  } catch (err) {
+    alert("Error claiming gift: " + err.message);
+    console.error(err);
+  }
+}
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    startListening();
+    document.getElementById("giftBtn").addEventListener("click", claimGift);
+  } else {
+    window.location.href = "index.html";
+  }
+});
+
+window.addEventListener("beforeunload", () => {
+  if (unsubscribeUser) unsubscribeUser();
+  if (unsubscribeTasks) unsubscribeTasks();
+});
+</script>
+
+</body>
+</html>

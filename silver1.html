@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tasks</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      background: linear-gradient(135deg, #f0f4f8, #e0e7ff); 
+      color: #111; 
+      min-height: 100vh; 
+      padding-bottom: 100px; 
+    }
+    header {
+      position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+      background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex; align-items: center; padding: 0 20px; z-index: 1000;
+    }
+    .back-btn { font-size: 28px; color: #1a73e8; cursor: pointer; }
+    .header-logo { max-height: 48px; position: absolute; left: 50%; transform: translateX(-50%); }
+
+    .main { padding-top: 90px; padding: 20px; max-width: 520px; margin: 0 auto; }
+
+    .package-header { text-align:center; font-size:1.9rem; font-weight:700; color:#1a73e8; margin-bottom:20px; }
+
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:25px; }
+    .stat-box { background:white; padding:16px; border-radius:16px; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.06); }
+    .stat-box h3 { font-size:1.55rem; font-weight:700; color:#e63939; }
+    .stat-box p { font-size:0.9rem; color:#666; margin-top:4px; }
+
+    .gift-section { text-align:center; margin:25px auto; max-width:360px; }
+    .gift-btn {
+      width:100%; padding:18px; font-size:1.25rem; font-weight:700; color:white;
+      background:linear-gradient(135deg,#ff6b6b,#ff8e53); border:none; border-radius:50px;
+      cursor:pointer; box-shadow:0 10px 30px rgba(255,107,107,0.4);
+      animation: gradientFlow 4s ease infinite; transition:all 0.4s;
+    }
+    .gift-btn:hover { transform:translateY(-5px); box-shadow:0 15px 40px rgba(255,107,107,0.6); }
+    .gift-btn:disabled { background:#aaa; animation:none; cursor:not-allowed; }
+    @keyframes gradientFlow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+    .task-list { display:flex; flex-direction:column; gap:14px; margin-top:10px; }
+    .task-card {
+      background:white; border-radius:16px; padding:18px; box-shadow:0 6px 20px rgba(0,0,0,0.08);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .task-name { font-weight:600; font-size:1.15rem; }
+
+    .complete-btn { background:#28a745; color:white; border:none; padding:10px 22px; border-radius:50px; font-weight:600; cursor:pointer; }
+
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:9999; }
+    .modal-content { background:white; border-radius:20px; width:92%; max-width:460px; max-height:92vh; overflow-y:auto; padding:25px; box-shadow:0 15px 50px rgba(0,0,0,0.3); }
+    .modal-close { position:absolute; top:12px; right:20px; font-size:38px; cursor:pointer; color:#777; }
+    .modal-image { width:100%; border-radius:12px; margin:15px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="back-btn" onclick="goBack()">←</div>
+  <img src="logo.png" alt="PS Group Logo" class="header-logo">
+</header>
+
+<div class="main">
+  <div class="package-header" id="currentPackage">Loading...</div>
+
+  <div class="stats">
+    <div class="stat-box"><h3 id="balanceDisplay">৳0.00</h3><p>Balance</p></div>
+    <div class="stat-box"><h3 id="earningsDisplay">৳0.00</h3><p>Earnings</p></div>
+    <div class="stat-box"><h3 id="completedDisplay">0/25</h3><p>Completed</p></div>
+  </div>
+
+  <!-- Gift Button -->
+  <div class="gift-section" id="giftSection" style="display:none;">
+    <button id="giftBtn" class="gift-btn" disabled>
+      <i class="fas fa-gift"></i> Claim Gift
+    </button>
+  </div>
+
+  <!-- Task List -->
+  <div class="task-list" id="taskList">
+    <div class="empty-state" style="padding:60px 20px; background:white; border-radius:16px; text-align:center;">
+      Loading tasks...
+    </div>
+  </div>
+</div>
+
+<!-- Task Modal -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">×</span>
+    <h2 id="modalTaskName">Task Name</h2>
+    <div id="modalImageContainer" style="display:none;"><img id="modalImage" class="modal-image" src="" alt=""></div>
+    <p id="modalDescription"></p>
+    <p style="font-size:1.3rem; text-align:center; margin:20px 0;">
+      <strong>Profit:</strong> <span id="modalProfit" style="color:#28a745;">৳0</span>
+    </p>
+    <button id="submitTaskBtn" onclick="submitTask()" style="width:100%; padding:16px; background:#28a745; color:white; border:none; border-radius:50px; font-size:1.1rem; font-weight:600;">
+      Complete Task
+    </button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+const THIS_PACKAGE_KEY = "silver-1";   // ← এখানে আপনার প্যাকেজ চেঞ্জ করুন (silver-1, gold-2 ইত্যাদি)
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAWsnuljcbCQgly7fhSh_n9_Q1j1ZtC7rU",
+  authDomain: "bdclash-80f60.firebaseapp.com",
+  projectId: "bdclash-80f60",
+  storageBucket: "bdclash-80f60.firebasestorage.app",
+  messagingSenderId: "842550397820",
+  appId: "1:842550397820:web:285ed51565a4d71d34b2f9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentTaskId = null;
+let currentProfit = 0;
+let unsubscribe = null;
+
+function safeGet(id) { return document.getElementById(id); }
+
+window.goBack = () => window.location.href = "profile.html";   // profile.html এ ফিরবে
+
+// =================== MAIN LISTENER ===================
+auth.onAuthStateChanged(user => {
+  if (!user) return window.location.href = "index.html";
+
+  const userRef = db.collection("users").doc(user.uid);
+
+  unsubscribe = userRef.onSnapshot(async (doc) => {
+    if (!doc.exists) return;
+
+    const data = doc.data() || {};
+
+    // Balance & Earnings Sync
+    safeGet("balanceDisplay").textContent = `৳${Number(data.balance || 0).toFixed(2)}`;
+    safeGet("earningsDisplay").textContent = `৳${Number(data.taskEarnings || 0).toFixed(2)}`;
+
+    // Completed Count
+    const completedKey = `completedTasks_${THIS_PACKAGE_KEY.replace("-", "_")}`;
+    const completed = data[completedKey] || [];
+    safeGet("completedDisplay").textContent = `${completed.length}/25`;
+
+    safeGet("currentPackage").textContent = THIS_PACKAGE_KEY.toUpperCase() + " Tasks";
+
+    // Load Tasks
+    loadTasks(completed);
+    
+    // Gift Button Control (admin giftbox থেকে)
+    checkGiftStatus(data, completed);
+  });
+});
+
+// =================== TASKS LOAD ===================
+async function loadTasks(completed) {
+  const taskListEl = safeGet("taskList");
+  taskListEl.innerHTML = "";
+
+  try {
+    const snap = await db.collection("tasks")
+      .where("packageKey", "==", THIS_PACKAGE_KEY)
+      .get();
+
+    if (snap.empty) {
+      taskListEl.innerHTML = `<div style="text-align:center;padding:60px;background:white;border-radius:16px;">No tasks available yet</div>`;
+      return;
+    }
+
+    snap.forEach(doc => {
+      const task = doc.data();
+      const isDone = completed.includes(doc.id);
+
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.innerHTML = `
+        <div style="flex:1;">
+          <div class="task-name">${task.taskName || "Task"}</div>
+          ${isDone ? `<span style="color:#28a745;font-weight:600;">✓ Completed</span>` : 
+            `<button class="complete-btn" onclick="openModal('${doc.id}', ${task.profit || 0})">View & Complete</button>`}
+        </div>
+      `;
+      taskListEl.appendChild(card);
+    });
+  } catch (e) {
+    console.error(e);
+    taskListEl.innerHTML = `<div style="color:red;text-align:center;">Error loading tasks (Check Firestore Rules)</div>`;
+  }
+}
+
+// =================== MODAL ===================
+window.openModal = async (taskId, profit) => {
+  currentTaskId = taskId;
+  currentProfit = profit;
+
+  const snap = await db.collection("tasks").doc(taskId).get();
+  const task = snap.data();
+
+  safeGet("modalTaskName").textContent = task.taskName;
+  safeGet("modalDescription").textContent = task.description || "";
+  safeGet("modalProfit").textContent = `৳${profit}`;
+
+  const imgContainer = safeGet("modalImageContainer");
+  if (task.imageUrl) {
+    safeGet("modalImage").src = task.imageUrl;
+    imgContainer.style.display = "block";
+  } else imgContainer.style.display = "none";
+
+  safeGet("taskModal").style.display = "flex";
+};
+
+window.closeModal = () => {
+  safeGet("taskModal").style.display = "none";
+};
+
+// =================== COMPLETE TASK ===================
+window.submitTask = async () => {
+  if (!currentTaskId) return;
+
+  const btn = safeGet("submitTaskBtn");
+  btn.disabled = true;
+  btn.textContent = "Processing...";
+
+  const user = auth.currentUser;
+  const userRef = db.collection("users").doc(user.uid);
+  const completedKey = `completedTasks_${THIS_PACKAGE_KEY.replace("-", "_")}`;
+
+  try {
+    await userRef.update({
+      balance: firebase.firestore.FieldValue.increment(currentProfit),
+      taskEarnings: firebase.firestore.FieldValue.increment(currentProfit),
+      [completedKey]: firebase.firestore.FieldValue.arrayUnion(currentTaskId)
+    });
+
+    alert(`✅ Task Completed! +৳${currentProfit} added to balance & earnings`);
+    closeModal();
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Complete Task";
+  }
+};
+
+// =================== GIFT BUTTON (admin control) ===================
+async function checkGiftStatus(userData, completed) {
+  const giftSection = safeGet("giftSection");
+  const giftBtn = safeGet("giftBtn");
+
+  try {
+    const giftSnap = await db.collection("giftConfigs").doc(THIS_PACKAGE_KEY).get();
+    if (!giftSnap.exists) return;
+
+    const g = giftSnap.data();
+    if (g.enabled === false) return;
+
+    const required = Number(g.requiredCompleted || 20);
+    const alreadyClaimed = userData.giftClaimedPackages?.includes(THIS_PACKAGE_KEY);
+
+    if (alreadyClaimed) {
+      giftSection.style.display = "none";
+    } else if (completed.length >= required) {
+      giftSection.style.display = "block";
+      giftBtn.disabled = false;
+      giftBtn.innerHTML = `<i class="fas fa-gift"></i> Claim ৳${g.giftAmount || 0}`;
+      giftBtn.onclick = () => claimGift();
+    } else {
+      giftSection.style.display = "block";
+      giftBtn.disabled = true;
+      giftBtn.innerHTML = `<i class="fas fa-lock"></i> Need ${required - completed.length} more tasks`;
+    }
+  } catch (e) { console.error("Gift error", e); }
+}
+
+async function claimGift() {
+  const btn = safeGet("giftBtn");
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Claiming...`;
+
+  try {
+    const user = auth.currentUser;
+    const userRef = db.collection("users").doc(user.uid);
+    const giftSnap = await db.collection("giftConfigs").doc(THIS_PACKAGE_KEY).get();
+    const amount = Number(giftSnap.data().giftAmount || 0);
+
+    await userRef.update({
+      balance: firebase.firestore.FieldValue.increment(amount),
+      giftClaimedPackages: firebase.firestore.FieldValue.arrayUnion(THIS_PACKAGE_KEY)
+    });
+
+    alert(`🎉 ৳${amount} Gift Claimed Successfully!`);
+    safeGet("giftSection").style.display = "none";
+  } catch (err) {
+    alert("Gift claim failed: " + err.message);
+  }
+}
+</script>
+</body>
+</html>

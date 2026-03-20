@@ -350,20 +350,21 @@
       background: #f8f9fa;
       border-radius: 12px;
       padding: 16px;
-      text-align: left;
+      text-align: center;
       border: 1px solid #eee;
     }
 
     .package-item h4 {
       margin: 0 0 8px;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       color: #1a73e8;
     }
 
     .package-item p {
-      margin: 4px 0;
-      font-size: 0.95rem;
+      margin: 8px 0;
+      font-size: 1rem;
       color: #555;
+      font-weight: 500;
     }
 
     .tg-button {
@@ -466,7 +467,32 @@
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('silverModal')">×</button>
     <h3 class="modal-title">Silver Hall Packages</h3>
-    <div class="package-list" id="silverPackages"></div>
+    <div class="package-list">
+      <div class="package-item">
+        <h4>Silver Hall Level 1</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Silver Hall Level 1')">
+          Enter
+        </button>
+      </div>
+      <div class="package-item">
+        <h4>Silver Hall Level 2</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Silver Hall Level 2')">
+          Enter
+        </button>
+      </div>
+      <div class="package-item">
+        <h4>Silver Hall Level 3</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Silver Hall Level 3')">
+          Enter
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -474,7 +500,32 @@
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('goldModal')">×</button>
     <h3 class="modal-title">Gold Hall Packages</h3>
-    <div class="package-list" id="goldPackages"></div>
+    <div class="package-list">
+      <div class="package-item">
+        <h4>Gold Hall Level 1</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Gold Hall Level 1')">
+          Enter
+        </button>
+      </div>
+      <div class="package-item">
+        <h4>Gold Hall Level 2</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Gold Hall Level 2')">
+          Enter
+        </button>
+      </div>
+      <div class="package-item">
+        <h4>Gold Hall Level 3</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Gold Hall Level 3')">
+          Enter
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -482,7 +533,32 @@
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('diamondModal')">×</button>
     <h3 class="modal-title">Diamond Hall Packages</h3>
-    <div class="package-list" id="diamondPackages"></div>
+    <div class="package-list">
+      <div class="package-item">
+        <h4>Diamond Hall Level 1</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Diamond Hall Level 1')">
+          Enter
+        </button>
+      </div>
+      <div class="package-item">
+        <h4>Diamond Hall Level 2</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Diamond Hall Level 2')">
+          Enter
+        </button>
+      </div>
+      <div class="package-item">
+        <h4>Diamond Hall Level 3</h4>
+        <p>25 Tasks Available</p>
+        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
+                onclick="checkAndEnter('Diamond Hall Level 3')">
+          Enter
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -517,7 +593,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Slider Logic
+// Slider Logic (আগের মতোই)
 document.addEventListener("DOMContentLoaded", () => {
   const slides = document.getElementById("slides");
   const nameElement = document.querySelector("#hallName .name-text");
@@ -569,11 +645,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Modal functions
+// Modal Control
 function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.style.display = "flex";
-  setTimeout(() => modal.classList.add("visible"), 10);
+  document.getElementById(modalId).style.display = "flex";
+  setTimeout(() => document.getElementById(modalId).classList.add("visible"), 10);
 }
 
 function closeModal(modalId) {
@@ -582,8 +657,9 @@ function closeModal(modalId) {
   setTimeout(() => modal.style.display = "none", 300);
 }
 
-// Updated checkAndEnter - supports "Silver (LV1)" format
+// Check membership and redirect
 async function checkAndEnter(packageName) {
+  // Bronze special case
   if (packageName.toLowerCase().includes("bronze")) {
     window.location.href = "task2.html";
     return;
@@ -602,134 +678,54 @@ async function checkAndEnter(packageName) {
       return;
     }
 
-    const membership = userDoc.data().membership || {};
+    const data = userDoc.data();
+    const membership = data.membership || {};
     const userHall  = (membership.hall  || "").trim().toLowerCase();
-    const userLevel = (membership.level || "").trim();
+    const userLevel = String(membership.level || "").trim().toLowerCase();
 
-    let pkgHall  = "";
+    // Parse package name
+    let pkgHall = "";
     let pkgLevel = "";
 
-    const lowerName = packageName.trim().toLowerCase();
-
-    // Case 1: "Silver Level 1" বা "Silver Level-1" বা "silver level 1"
-    if (lowerName.includes("level")) {
-      const parts = lowerName.split(/level/i);
-      pkgHall  = parts[0].trim().replace(/[- ]+$/, '');
-      pkgLevel = (parts[1] || "").replace(/[- ]/g, '').trim();
-    }
-    // Case 2: "Silver (LV1)" বা "Silver (lv1)"
-    else if (lowerName.match(/\((lv\d+)\)$/i)) {
-      const match = lowerName.match(/^(.*?)\s*\((lv)(\d+)\)$/i);
-      if (match) {
-        pkgHall  = match[1].trim();
-        pkgLevel = match[3];
-      }
-    }
-    // Case 3: "Silver-1" বা "Silver1"
-    else {
-      const match = lowerName.match(/^([a-z]+)[\s-]*(\d+)$/i);
-      if (match) {
-        pkgHall  = match[1];
-        pkgLevel = match[2];
-      } else {
-        pkgHall = lowerName; // fallback – level ছাড়া হলে
-      }
+    const lowerName = packageName.toLowerCase();
+    if (lowerName.includes("silver hall level")) {
+      pkgHall = "silver";
+      pkgLevel = lowerName.split("level")[1]?.trim() || "";
+    } else if (lowerName.includes("gold hall level")) {
+      pkgHall = "gold";
+      pkgLevel = lowerName.split("level")[1]?.trim() || "";
+    } else if (lowerName.includes("diamond hall level")) {
+      pkgHall = "diamond";
+      pkgLevel = lowerName.split("level")[1]?.trim() || "";
     }
 
-    // Clean up
-    pkgHall = pkgHall.replace(/[^a-z]/g, '');
+    const hallMatch  = userHall === pkgHall;
+    const levelMatch = (pkgLevel === "" || userLevel === pkgLevel);
 
-    console.log("Improved debug:", {
-      userHall,
-      userLevel,
-      pkgRaw: packageName,
-      parsedHall: pkgHall,
-      parsedLevel: pkgLevel
-    });
-
-    const hallMatches  = userHall === pkgHall;
-    const levelMatches = userLevel === pkgLevel;
-
-    if (hallMatches && levelMatches) {
-      window.location.href = "task.html";
+    if (hallMatch && levelMatch) {
+      const targetFile = pkgHall + pkgLevel + ".html";
+      window.location.href = targetFile;
     } else {
       openModal("telegramModal");
     }
 
   } catch (err) {
     console.error("Membership check error:", err);
-    alert("Error checking membership status");
+    alert("Error checking membership. Please try again.");
   }
 }
 
-// Load packages
-async function loadPackagesForHall(hallName, containerId) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '<p style="color:#777; text-align:center;">Loading packages...</p>';
-
-  try {
-    const snap = await db.collection("packages")
-      .where("hall", "==", hallName)
-      .get();
-
-    container.innerHTML = "";
-
-    if (snap.empty) {
-      container.innerHTML = '<p style="color:#888; text-align:center;">No packages available for this hall yet.</p>';
-      return;
-    }
-
-    snap.forEach(doc => {
-      const pkg = doc.data();
-      const pkgName = pkg.name || "Unnamed";
-
-      const item = document.createElement("div");
-      item.className = "package-item";
-      item.innerHTML = `
-        <h4>${pkgName}</h4>
-        <p><strong>Price:</strong> ৳${pkg.price || 0}</p>
-        <p><strong>Commission Rate:</strong> ${pkg.commissionRate || "N/A"}</p>
-        <p><strong>Tasks:</strong> ${pkg.taskCount || 0}</p>
-        <button class="enter-button" style="margin-top:12px; width:100%; max-width:180px;" 
-                onclick="checkAndEnter('${pkgName.replace(/'/g, "\\'")}')">
-          Enter
-        </button>
-      `;
-      container.appendChild(item);
-    });
-  } catch (err) {
-    console.error("Package load error:", err);
-    container.innerHTML = '<p style="color:#e63939; text-align:center;">Error loading packages</p>';
-  }
-}
-
-// Enter button handlers
-document.querySelectorAll(".enter-button").forEach(btn => {
+// Hall card Enter buttons
+document.querySelectorAll(".enter-button[data-hall]").forEach(btn => {
   btn.addEventListener("click", () => {
     const hall = btn.getAttribute("data-hall");
 
-    if (hall === "Bronze Hall") {
-      window.location.href = "task2.html";
-      return;
-    }
-
     let modalId = "";
-    let containerId = "";
-    let dbHallName = hall.replace(" Hall", "");
+    if (hall === "Silver Hall")      modalId = "silverModal";
+    else if (hall === "Gold Hall")    modalId = "goldModal";
+    else if (hall === "Diamond Hall") modalId = "diamondModal";
 
-    if (hall === "Silver Hall") {
-      modalId = "silverModal";
-      containerId = "silverPackages";
-    } else if (hall === "Gold Hall") {
-      modalId = "goldModal";
-      containerId = "goldPackages";
-    } else if (hall === "Diamond Hall") {
-      modalId = "diamondModal";
-      containerId = "diamondPackages";
-    }
-
-    if (modalId && containerId) {
-      loadPackagesForHall(dbHallName, containerId);
+    if (modalId) {
       openModal(modalId);
     }
   });
